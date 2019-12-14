@@ -25,12 +25,12 @@ def make_random_list():
         res.append(np.random.randint(low=0, high=MAX_RANGE, size=150))
     return res
 
-def bagging():
+def bagging(feachers = NONE_TARGET_FEACHER):
     l = []
     rand = make_random_list()
     for i in range(5):
         l.append(tree.DecisionTreeClassifier(max_depth = 13, max_features = 12))
-        l[i] = l[i].fit(data[NONE_TARGET_FEACHER].iloc[rand[i]], data['target'].iloc[rand[i]])
+        l[i] = l[i].fit(data[feachers].iloc[rand[i]], data['target'].iloc[rand[i]])
     return l
 def random_forrest():
     l = []
@@ -52,10 +52,21 @@ def eval_ensemmble(bagging_trees, feachers = NONE_TARGET_FEACHER):
             answers[0][j] += answers[i+1][j]
     answers[0] = list(map(lambda x: 1 if x > 2 else 0, answers[0]))
     return calc_acc(answers[0])
+def find_important_feacher():
+    for i in range(len(NONE_TARGET_FEACHER)):
+        test_feacher = NONE_TARGET_FEACHER[0:i] + NONE_TARGET_FEACHER[i+1:MAX_RANGE]
+        trees = bagging(test_feacher)
+        res =  eval_ensemmble(trees, feachers=test_feacher)
+        if res <45 :
+            print(NONE_TARGET_FEACHER[i], '\t -->', res)
 bagging_trees = bagging()
 random_forrest, feachers_selected = random_forrest()
 print(feachers_selected)
 print(eval_ensemmble(bagging_trees))
 print(eval_ensemmble(random_forrest, feachers=feachers_selected))
 print(decision_tree())
+for i in range(100):
+    print('--------new test------------')
+    find_important_feacher()
+    print('\n\n')
 # print(decision_tree())
